@@ -50,16 +50,16 @@ var AdjustHttpHeader = function (_stream$Transform) {
 
       this.header = Buffer.concat([this.header, chunk]);
 
-      var endOfHeader = this.header.indexOf(Buffer.from('\n\n'));
-
       var lineBreak = '\n';
       var offset = 1;
 
-      if (endOfHeader === -1) {
-        endOfHeader = this.header.indexOf(Buffer.from('\r\n\r\n'));
+      var endOfHeader = this.header.indexOf(Buffer.from('' + lineBreak + lineBreak));
 
+      if (endOfHeader === -1) {
         lineBreak = '\r\n';
         offset = 2;
+
+        endOfHeader = this.header.indexOf(Buffer.from('' + lineBreak + lineBreak));
 
         if (endOfHeader === -1) {
           return callback(null);
