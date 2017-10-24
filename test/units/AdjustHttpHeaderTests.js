@@ -147,5 +147,32 @@ suite('AdjustHttpHeader', () => {
       `);
       httpRequest.end();
     });
+
+    test('correctly deals with \\r\\n line-endings.', done => {
+      const httpRequest = new stream.PassThrough();
+      const adjustHttpHeader = new AdjustHttpHeader({ key: 'foo', value: 'bar' });
+
+      streamToString(httpRequest.pipe(adjustHttpHeader), (err, request) => {
+        assert.that(err).is.null();
+
+        assert.that(request).is.equalTo(stripIndent`
+          POST /index.html HTTP/1.1\r
+          Host: www.example.com\r
+          foo: bar\r
+          \r
+          Hello world!
+        `);
+        done();
+      });
+
+      httpRequest.write(stripIndent`
+        POST /index.html HTTP/1.1\r
+        Host: www.example.com\r
+        foo: baz\r
+        \r
+        Hello world!
+      `);
+      httpRequest.end();
+    });
   });
 });
