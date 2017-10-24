@@ -1,6 +1,6 @@
 {
   "name": "adjust-http-header",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "adjust-http-header adjusts HTTP headers in streams.",
   "contributors": [
     {

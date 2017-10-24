@@ -80,6 +80,8 @@ var AdjustHttpHeader = function (_stream$Transform) {
       this.push(header);
       this.push(Buffer.from(this.key + ': ' + this.value + lineBreak));
 
+      this.inHeader = false;
+
       this.push(body);
       callback(null);
     }
