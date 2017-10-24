@@ -52,23 +52,33 @@ var AdjustHttpHeader = function (_stream$Transform) {
 
       var endOfHeader = this.header.indexOf(Buffer.from('\n\n'));
 
+      var lineBreak = '\n';
+      var offset = 1;
+
       if (endOfHeader === -1) {
-        return callback(null);
+        endOfHeader = this.header.indexOf(Buffer.from('\r\n\r\n'));
+
+        lineBreak = '\r\n';
+        offset = 2;
+
+        if (endOfHeader === -1) {
+          return callback(null);
+        }
       }
 
-      var header = this.header.slice(0, endOfHeader + 1);
-      var body = this.header.slice(endOfHeader + 1);
+      var header = this.header.slice(0, endOfHeader + offset);
+      var body = this.header.slice(endOfHeader + offset);
 
-      var startOfHeaderToRemove = header.indexOf(Buffer.from('\n' + this.key + ':'));
+      var startOfHeaderToRemove = header.indexOf(Buffer.from('' + lineBreak + this.key + ':'));
 
       if (startOfHeaderToRemove !== -1) {
-        var endOfHeaderToRemove = header.indexOf(Buffer.from('\n'), startOfHeaderToRemove + 1);
+        var endOfHeaderToRemove = header.indexOf(Buffer.from(lineBreak), startOfHeaderToRemove + 1);
 
         header = Buffer.concat([header.slice(0, startOfHeaderToRemove + 1), header.slice(endOfHeaderToRemove + 1)]);
       }
 
       this.push(header);
-      this.push(Buffer.from(this.key + ': ' + this.value + '\n'));
+      this.push(Buffer.from(this.key + ': ' + this.value + lineBreak));
 
       this.push(body);
       callback(null);
