@@ -1,0 +1,34 @@
+{
+  "name": "adjust-http-header",
+  "version": "0.0.0",
+  "description": "adjust-http-header adjusts HTTP headers in streams.",
+  "contributors": [
+    {
+      "name": "Golo Roden",
+      "email": "golo.roden@thenativeweb.io"
+    },
+    {
+      "name": "Jan-Hendrik Grundhöfer",
+      "email": "jan-hendrik.grundhoefer@thenativeweb.io"
+    }
+  ],
+  "main": "dist/AdjustHttpHeader.js",
+  "dependencies": {},
+  "devDependencies": {
+    "assertthat": "0.11.0",
+    "common-tags": "1.4.0",
+    "roboter": "0.15.4",
+    "roboter-server": "0.15.4",
+    "stream-to-string": "1.1.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/thenativeweb/adjust-http-header.git"
+  },
+  "keywords": [
+    "header",
+    "http",
+    "stream"
+  ],
+  "license": "MIT"
+}
