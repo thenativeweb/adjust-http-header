@@ -72,9 +72,9 @@ var AdjustHttpHeader = function (_stream$Transform) {
       var startOfHeaderToRemove = header.indexOf(Buffer.from('' + lineBreak + this.key + ':'));
 
       if (startOfHeaderToRemove !== -1) {
-        var endOfHeaderToRemove = header.indexOf(Buffer.from(lineBreak), startOfHeaderToRemove + 1);
+        var endOfHeaderToRemove = header.indexOf(Buffer.from(lineBreak), startOfHeaderToRemove + offset);
 
-        header = Buffer.concat([header.slice(0, startOfHeaderToRemove + 1), header.slice(endOfHeaderToRemove + 1)]);
+        header = Buffer.concat([header.slice(0, startOfHeaderToRemove + offset), header.slice(endOfHeaderToRemove + offset)]);
       }
 
       this.push(header);
