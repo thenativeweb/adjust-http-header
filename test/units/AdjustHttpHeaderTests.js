@@ -1,10 +1,13 @@
 'use strict';
 
-const stream = require('stream');
+const net = require('net'),
+      stream = require('stream');
 
 const assert = require('assertthat'),
+      freeport = require('freeport'),
       streamToString = require('stream-to-string'),
-      stripIndent = require('common-tags/lib/stripIndent');
+      stripIndent = require('common-tags/lib/stripIndent'),
+      superagent = require('superagent');
 
 const AdjustHttpHeader = require('../../lib/AdjustHttpHeader');
 
@@ -173,6 +176,46 @@ suite('AdjustHttpHeader', () => {
         Hello world!
       `);
       httpRequest.end();
+    });
+
+    test('works with real HTTP requests.', done => {
+      freeport((errPort, port) => {
+        assert.that(errPort).is.null();
+
+        const server = net.createServer(socket => {
+          const adjustHttpHeader = new AdjustHttpHeader({ key: 'foo', value: 'bar' });
+
+          streamToString(socket.pipe(adjustHttpHeader), (err, request) => {
+            assert.that(err).is.null();
+
+            assert.that(request).is.equalTo(stripIndent`
+              POST / HTTP/1.1\r
+              Host: localhost:${port}\r
+              Accept-Encoding: gzip, deflate\r
+              User-Agent: node-superagent/3.7.0\r
+              content-type: application/json\r
+              Content-Length: 13\r
+              Connection: close\r
+              foo: bar\r
+              \r
+              {"foo":"bar"}
+            `);
+            done();
+          });
+
+          socket.end();
+        });
+
+        server.listen(port, () => {
+          superagent.
+            post(`http://localhost:${port}`).
+            set('content-type', 'application/json').
+            send({ foo: 'bar' }).
+            end(err => {
+              assert.that(err.code).is.equalTo('ECONNRESET');
+            });
+        });
+      });
     });
   });
 });

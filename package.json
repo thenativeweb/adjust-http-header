@@ -17,9 +17,11 @@
   "devDependencies": {
     "assertthat": "0.11.0",
     "common-tags": "1.4.0",
+    "freeport": "1.0.5",
     "roboter": "0.15.4",
     "roboter-server": "0.15.4",
-    "stream-to-string": "1.1.0"
+    "stream-to-string": "1.1.0",
+    "superagent": "3.7.0"
   },
   "repository": {
     "type": "git",
