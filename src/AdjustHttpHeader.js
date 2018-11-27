@@ -34,20 +34,13 @@ class AdjustHttpHeader extends stream.Transform {
 
     this.header = Buffer.concat([ this.header, chunk ]);
 
-    let lineBreak = '\n';
-    let offset = 1;
+    const lineBreak = '\r\n';
+    const offset = 2;
 
-    let endOfHeader = this.header.indexOf(Buffer.from(`${lineBreak}${lineBreak}`));
+    const endOfHeader = this.header.indexOf(Buffer.from(`${lineBreak}${lineBreak}`));
 
     if (endOfHeader === -1) {
-      lineBreak = '\r\n';
-      offset = 2;
-
-      endOfHeader = this.header.indexOf(Buffer.from(`${lineBreak}${lineBreak}`));
-
-      if (endOfHeader === -1) {
-        return callback(null);
-      }
+      return callback(null);
     }
 
     let header = this.header.slice(0, endOfHeader + offset);

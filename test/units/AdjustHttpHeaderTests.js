@@ -9,7 +9,7 @@ const assert = require('assertthat'),
       stripIndent = require('common-tags/lib/stripIndent'),
       superagent = require('superagent');
 
-const AdjustHttpHeader = require('../../lib/AdjustHttpHeader');
+const AdjustHttpHeader = require('../../src/AdjustHttpHeader');
 
 suite('AdjustHttpHeader', () => {
   test('is a function.', done => {
@@ -52,19 +52,19 @@ suite('AdjustHttpHeader', () => {
       streamToString(httpRequest.pipe(adjustHttpHeader), (err, request) => {
         assert.that(err).is.null();
         assert.that(request).is.equalTo(stripIndent`
-          POST /index.html HTTP/1.1
-          Host: www.example.com
-          foo: bar
-
+          POST /index.html HTTP/1.1\r
+          Host: www.example.com\r
+          foo: bar\r
+          \r
           Hello world!
         `);
         done();
       });
 
       httpRequest.write(stripIndent`
-        POST /index.html HTTP/1.1
-        Host: www.example.com
-
+        POST /index.html HTTP/1.1\r
+        Host: www.example.com\r
+        \r
         Hello world!
       `);
       httpRequest.end();
@@ -76,88 +76,6 @@ suite('AdjustHttpHeader', () => {
 
       streamToString(httpRequest.pipe(adjustHttpHeader), (err, request) => {
         assert.that(err).is.null();
-        assert.that(request).is.equalTo(stripIndent`
-          POST /index.html HTTP/1.1
-          Host: www.example.com
-          foo: bar
-
-          Hello world!
-        `);
-        done();
-      });
-
-      httpRequest.write(stripIndent`
-        POST /index.html HTTP/1.1
-        Host: www.example.com
-        foo: baz
-
-        Hello world!
-      `);
-      httpRequest.end();
-    });
-
-    test('replaces the header if it is present, even if it is not the last one.', done => {
-      const httpRequest = new stream.PassThrough();
-      const adjustHttpHeader = new AdjustHttpHeader({ key: 'foo', value: 'bar' });
-
-      streamToString(httpRequest.pipe(adjustHttpHeader), (err, request) => {
-        assert.that(err).is.null();
-        assert.that(request).is.equalTo(stripIndent`
-          POST /index.html HTTP/1.1
-          Host: www.example.com
-          foo: bar
-
-          Hello world!
-        `);
-        done();
-      });
-
-      httpRequest.write(stripIndent`
-        POST /index.html HTTP/1.1
-        foo: baz
-        Host: www.example.com
-
-        Hello world!
-      `);
-      httpRequest.end();
-    });
-
-    test('replaces the header if it is present, even if the header spans multiple chunks.', done => {
-      const httpRequest = new stream.PassThrough();
-      const adjustHttpHeader = new AdjustHttpHeader({ key: 'foo', value: 'bar' });
-
-      streamToString(httpRequest.pipe(adjustHttpHeader), (err, request) => {
-        assert.that(err).is.null();
-        assert.that(request).is.equalTo(stripIndent`
-          POST /index.html HTTP/1.1
-          Host: www.example.com
-          foo: bar
-
-          Hello world!
-        `);
-        done();
-      });
-
-      httpRequest.write(stripIndent`
-        POST /index.html HTTP/1.1
-        Host: www.example.com
-        fo
-      `);
-      httpRequest.write(stripIndent`
-        o: baz
-
-        Hello world!
-      `);
-      httpRequest.end();
-    });
-
-    test('correctly deals with \\r\\n line-endings.', done => {
-      const httpRequest = new stream.PassThrough();
-      const adjustHttpHeader = new AdjustHttpHeader({ key: 'foo', value: 'bar' });
-
-      streamToString(httpRequest.pipe(adjustHttpHeader), (err, request) => {
-        assert.that(err).is.null();
-
         assert.that(request).is.equalTo(stripIndent`
           POST /index.html HTTP/1.1\r
           Host: www.example.com\r
@@ -178,6 +96,92 @@ suite('AdjustHttpHeader', () => {
       httpRequest.end();
     });
 
+    test('replaces the header if it is present, even if it is not the last one.', done => {
+      const httpRequest = new stream.PassThrough();
+      const adjustHttpHeader = new AdjustHttpHeader({ key: 'foo', value: 'bar' });
+
+      streamToString(httpRequest.pipe(adjustHttpHeader), (err, request) => {
+        assert.that(err).is.null();
+        assert.that(request).is.equalTo(stripIndent`
+          POST /index.html HTTP/1.1\r
+          Host: www.example.com\r
+          foo: bar\r
+          \r
+          Hello world!
+        `);
+        done();
+      });
+
+      httpRequest.write(stripIndent`
+        POST /index.html HTTP/1.1\r
+        foo: baz\r
+        Host: www.example.com\r
+        \r
+        Hello world!
+      `);
+      httpRequest.end();
+    });
+
+    test('replaces the header if it is present, even if the header spans multiple chunks.', done => {
+      const httpRequest = new stream.PassThrough();
+      const adjustHttpHeader = new AdjustHttpHeader({ key: 'foo', value: 'bar' });
+
+      streamToString(httpRequest.pipe(adjustHttpHeader), (err, request) => {
+        assert.that(err).is.null();
+        assert.that(request).is.equalTo(stripIndent`
+          POST /index.html HTTP/1.1\r
+          Host: www.example.com\r
+          foo: bar\r
+          \r
+          Hello world!
+        `);
+        done();
+      });
+
+      httpRequest.write(stripIndent`
+        POST /index.html HTTP/1.1\r
+        Host: www.example.com\r
+        fo
+      `);
+      httpRequest.write(stripIndent`
+        o: baz\r
+        \r
+        Hello world!
+      `);
+      httpRequest.end();
+    });
+
+    test('ignores \\r\\n in body.', done => {
+      const httpRequest = new stream.PassThrough();
+      const adjustHttpHeader = new AdjustHttpHeader({ key: 'foo', value: 'bar' });
+
+      streamToString(httpRequest.pipe(adjustHttpHeader), (err, request) => {
+        assert.that(err).is.null();
+
+        assert.that(request).is.equalTo(stripIndent`
+          POST /index.html HTTP/1.1\r
+          Host: www.example.com\r
+          foo: bar\r
+          \r
+          Hello world!\r
+          \r
+          Hello world!
+        `);
+        done();
+      });
+
+      httpRequest.write(stripIndent`
+        POST /index.html HTTP/1.1\r
+        Host: www.example.com\r
+        foo: baz\r
+        \r
+        Hello world!\r
+        \r
+        Hello world!
+      `);
+      httpRequest.end();
+    });
+
     test('works with real HTTP requests.', done => {
       freeport((errPort, port) => {
         assert.that(errPort).is.null();
@@ -192,7 +196,7 @@ suite('AdjustHttpHeader', () => {
               POST / HTTP/1.1\r
               Host: localhost:${port}\r
               Accept-Encoding: gzip, deflate\r
-              User-Agent: node-superagent/3.7.0\r
+              User-Agent: node-superagent/4.0.0\r
               content-type: application/json\r
               Content-Length: 13\r
               Connection: close\r
