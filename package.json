@@ -18,7 +18,7 @@
     "assertthat": "2.0.0",
     "common-tags": "1.8.0",
     "freeport": "1.0.5",
-    "roboter": "3.0.2",
+    "roboter": "13.2.1",
     "stream-to-string": "1.1.0",
     "superagent": "4.0.0"
   },
